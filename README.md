@@ -1,141 +1,102 @@
-# Mortben Backend - Diet Meal Delivery & Nutrition Consultation API
+# 🥗 Mortben — Diet Meal Delivery & Nutrition Tele-Consultation API
 
 <p align="center">
-  <img src="assets/banner.svg" alt="Mortben Backend Banner" width="100%">
+  <img src="./assets/banner.svg" alt="Architecture Banner" width="100%" />
 </p>
 
 <p align="center">
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-20.x-green?style=for-the-badge&logo=node.js" alt="Node.js"></a>
-  <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express-4.21-black?style=for-the-badge&logo=express" alt="Express"></a>
-  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript"></a>
-  <a href="https://www.prisma.io"><img src="https://img.shields.io/badge/Prisma-6.x-2D3748?style=for-the-badge&logo=prisma" alt="Prisma"></a>
-  <a href="https://www.mongodb.com"><img src="https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB"></a>
-  <a href="https://stripe.com"><img src="https://img.shields.io/badge/Stripe-Payments-008CDD?style=for-the-badge&logo=stripe" alt="Stripe"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-ISC-blue?style=for-the-badge" alt="License"></a>
+  <a href="https://www.postman.com/shahjalal-backend-9458759/shahjalal-api-portfolio/collection/48491387-2d2565c4-5592-44c5-9784-f54420bb7d95">
+    <img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="height: 34px;" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://www.postman.com/shahjalal-backend-9458759/shahjalal-api-portfolio/collection/48491387-2d2565c4-5592-44c5-9784-f54420bb7d95">
+    <img src="https://img.shields.io/badge/Postman-Interactive%20API%20Documentation-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="Postman Documentation" />
+  </a>
+  &nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  &nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />
+  &nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
 </p>
 
 ---
 
-## 📖 Overview
+## 📌 Executive Overview
 
-**Mortben Backend (`mortben-backend`)** is an enterprise-scale healthy meal delivery and clinical nutrition consultation RESTful API. Built with Express.js, TypeScript, and Prisma ORM with MongoDB, the API orchestrates customized caloric meal subscription plans (daily, weekly, monthly), nutritionist appointment booking (online and clinic visits), body weight goal tracking, multi-city delivery availability, and integrated payments.
+Custom dietary meal box subscription engine, macro nutritional tracking, weekly menu generation, and certified nutritionist tele-consultation scheduling built with Node.js, Express, TypeScript, and Prisma.
 
----
-
-## ⚡ Key Features
-
-- **🍱 Subscription Meal Planning & Delivery:** Tiered plans tailored for weight loss, muscle gain, maintenance, or therapeutic dietary protocols.
-- **🩺 Nutritionist Consultations & Calendars:** Interactive appointment booking engine supporting both virtual telemedicine video slots and in-person consultations.
-- **⚖️ Biometric Health & Weight Progress:** Longitudinal weight entry tracking correlated with nutritional intake and activity levels.
-- **🛒 Diet Cart, Checkout & Logistics:** Flexible multi-meal order checkout supporting Stripe digital payments, bank transfers, and cash-on-delivery (COD).
-- **🏙️ Geo-Fenced City Availability:** Dynamic urban zone coverage ensuring verified delivery radius fulfillment.
+This microservice has been designed following enterprise software engineering standards, featuring clean modular service architecture, centralized error handling, robust JWT authorization, strict input validation, and comprehensive automated database models.
 
 ---
 
-## 🏗️ System Architecture
+## ⚡ Interactive API Documentation (Postman)
 
-```mermaid
-flowchart TD
-    Client[Web & Mobile Clients] -->|HTTPS REST| Express[Express.js App Router]
+The entire API specification, complete with route headers, payload samples, and JWT authentication schemas, is published and directly accessible in the public Postman workspace:
 
-    subgraph Middleware_Layer ["Request Pipeline"]
-        Express --> Auth[JWT & Auth Guards]
-        Auth --> Validation[Zod Request Validation]
-        Validation --> Storage[DO Spaces S3 Uploader]
-    end
+👉 **[Launch Interactive Postman Workspace](https://www.postman.com/shahjalal-backend-9458759/shahjalal-api-portfolio/collection/48491387-2d2565c4-5592-44c5-9784-f54420bb7d95)** *(No forking or sign-in required — instant browser reference)*
 
-    subgraph Service_Domains ["Service Domains"]
-        Storage --> MealSvc[Meal & Diet Plan Service]
-        Storage --> ConsultSvc[Nutritionist Consultation Engine]
-        Storage --> OrderSvc[Diet Cart & Orders]
-        Storage --> TrackingSvc[Weight Progress Tracker]
-    end
-
-    subgraph Integration ["Payment & DB"]
-        OrderSvc --> Stripe[Stripe Payment Gateway]
-        Service_Domains --> Prisma[Prisma ORM]
-        Prisma --> MongoDB[(MongoDB Database)]
-    end
-```
+- **Collection UID**: `48491387-2d2565c4-5592-44c5-9784-f54420bb7d95`
+- **Workspace**: Shahjalal API Portfolio
+- **Environment**: Cloud Production / Local Docker Compose
 
 ---
 
-## 🗂️ Project Structure
+## 🏗️ Architecture & Data Modeling
 
-```
-mortben-backend/
-├── assets/
-│   └── banner.svg               # Architectural repository banner
-├── prisma/
-│   └── schema.prisma            # MongoDB schema definitions
-├── src/
-│   ├── app/
-│   │   ├── modules/             # Auth, User, Food, Meal, Package, Consultation, Order
-│   │   ├── middlewares/         # Auth, validation, error handling
-│   │   └── routes/              # Central route index
-│   ├── config/                  # Environment bindings
-│   ├── helpers/                 # FCM push, JWT, Twilio SMS
-│   ├── shared/                  # DO Spaces uploader, Prisma client
-│   ├── app.ts                   # Express application setup
-│   └── server.ts                # HTTP server bootstrapper
-├── package.json
-└── tsconfig.json
-```
+The backend persistence layer is engineered with production database schemas:
 
----
-
-## 🛠️ Tech Stack
-
-| Technology | Purpose |
+| Entity Model | Domain Responsibility |
 | :--- | :--- |
-| **Node.js & Express 4** | Core backend HTTP web service |
-| **TypeScript 5** | Strong typing and interface contracts |
-| **Prisma ORM 6** | MongoDB document modeling and migrations |
-| **MongoDB** | Database for meal catalogs, consultations, and users |
-| **Stripe SDK** | Credit card payment processing and webhooks |
-| **Twilio SDK** | SMS OTP verification and appointment reminders |
-| **DigitalOcean Spaces** | Cloud storage for culinary imagery |
+| `Food` | Nutritional ingredients, macro calories, protein, carb, and allergen profiles |
+| `Meal` | Curated dietary breakfast, lunch, and dinner recipe combinations |
+| `Package` | Multi-week subscription tier options (Keto, Low Carb, High Protein) |
+| `DietCart / Order` | Meal box checkout, recurring delivery address, and order fulfillment |
+| `Consultation` | Telehealth video appointment slots with registered dietitians |
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 1. Prerequisites
+- **Node.js** v18.x or v20.x
+- **PostgreSQL** or **MongoDB** (refer to `.env.example`)
+- **Redis** (for BullMQ queues where applicable)
 
-- Node.js >= 20.0.0
-- MongoDB instance (MongoDB 6+)
-- npm or yarn
+### 2. Installation & Setup
+```bash
+# Clone the repository
+git clone https://github.com/shahjalal-labs/mortben-backend.git
+cd mortben-backend
 
-### Installation
+# Install dependencies
+npm install
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/shahjalal-labs/mortben-backend.git
-   cd mortben-backend
-   ```
+# Configure environment variables
+cp .env.example .env
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### 3. Database Migration & Development
+```bash
+# Generate database client
+npx prisma generate
 
-3. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+# Run database migrations
+npx prisma migrate dev
 
-4. Generate Prisma Client:
-   ```bash
-   npx prisma generate
-   ```
-
-5. Run development server:
-   ```bash
-   npm run dev
-   ```
+# Start development server
+npm run dev
+```
 
 ---
 
-## 📄 License
+## 👨‍💻 Engineering & Maintainer
 
-This project is licensed under the [ISC License](LICENSE).
+**Md. Shahjalal**  
+*Full Stack Software Engineer & Solutions Architect*  
+- **Email**: [muhommodshahjalal@gmail.com](mailto:muhommodshahjalal@gmail.com)  
+- **GitHub**: [@shahjalal-labs](https://github.com/shahjalal-labs)  
+- **Postman Portfolio**: [Shahjalal API Portfolio](https://www.postman.com/shahjalal-backend-9458759/shahjalal-api-portfolio)
+
+---
+<p align="center"><sub>Engineered with precision for production reliability and seamless scalability.</sub></p>
