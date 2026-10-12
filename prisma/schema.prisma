@@ -1,0 +1,317 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                    String                  @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNo               String                  @unique
+  fullName              String?
+  email                 String?
+  password              String?
+  city                  String?
+  address               String?
+  gender                Gender                  @default(Male)
+  dob                   String?
+  height                Float                   @default(0)
+  weight                Float                   @default(0)
+  activityLevel         Float                   @default(0)
+  goal                  UserGoal?
+  profileImage          String?
+  bio                   String?
+  fcmToken              String?
+  medicalConditions     String[]
+  activePlan            Boolean                 @default(false)
+  role                  UserRole                @default(USER)
+  status                UserStatus              @default(ACTIVE)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  order                 Order[]
+  package               Package[]
+  consultation          Consultation[]
+  generatedPlanWithFood GeneratedPlanWithFood[]
+
+  @@map("users")
+}
+
+model Food {
+  id                    String                  @id @default(auto()) @map("_id") @db.ObjectId
+  foodImage             String
+  foodName              String                  @unique
+  calories              Float                   @default(0)
+  description           String
+  subTotal              Float
+  total                 Float
+  extraPrice            Float
+  extras                Json
+  status                String                  @default("In_Stock")
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  meal                  Meal[]
+  generatedPlanWithFood GeneratedPlanWithFood[]
+  order                 Order[]
+
+  @@map("foods")
+}
+
+model Meal {
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  mealName          String     @unique
+  mealType          String
+  foodId            String     @db.ObjectId
+  calories          Float
+  status            String     @default("In_Stock")
+  availableDateFrom DateTime?  @default(now())
+  availableDateTo   DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  food              Food       @relation(fields: [foodId], references: [id])
+  dietCart          DietCart[]
+
+  @@map("meals")
+}
+
+model Package {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  planName    Plan
+  packageName String
+  calories    Float
+  status      Boolean  @default(false)
+  price       Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("packages")
+}
+
+model GeneratedPlanWithFood {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  foodId      String       @db.ObjectId
+  packageId   String       @db.ObjectId
+  mealPlan    String
+  planName    Plan
+  calories    Float
+  protein     Float
+  carbs       Float
+  fat         Float
+  status      MealStatus   @default(Created)
+  paymentType PaymentType  @default(NA)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  food        Food         @relation(fields: [foodId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  package     AdminPackage @relation(fields: [packageId], references: [id])
+  cart        Cart[]
+
+  @@map("generated_meal_plans")
+}
+
+model Cart {
+  id        String                @id @default(auto()) @map("_id") @db.ObjectId
+  mealId    String                @db.ObjectId
+  userId    String
+  packageId String
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  meal      GeneratedPlanWithFood @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([mealId, userId])
+  @@map("carts")
+}
+
+model DietCart {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  mealId    String   @db.ObjectId
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  meal      Meal     @relation(fields: [mealId], references: [id])
+
+  @@unique([userId, mealId])
+  @@map("diet_carts")
+}
+
+model Order {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String?     @db.ObjectId
+  foodId      String?     @db.ObjectId
+  mealName    String
+  paymentType PaymentType
+  status      OrderStatus @default(Payment_Completed)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User?       @relation(fields: [userId], references: [id])
+  food        Food?       @relation(fields: [foodId], references: [id])
+
+  @@map("orders")
+}
+
+model PendingUser {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNo String @unique
+
+  @@map("pending_users")
+}
+
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNo   String   @unique
+  otpCode   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("otps")
+}
+
+model WeightEntry {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  weight    Float
+  calories  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("weight_entries")
+}
+
+model ConsultationTime {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  availableDate DateTime
+  availableTime String
+  isAvailable   Boolean          @default(true)
+  type          ConsultationType
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@unique([availableDate, type, availableTime])
+  @@map("consultation_times")
+}
+
+model Consultation {
+  id        String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String             @db.ObjectId
+  slotId    String
+  schedule  DateTime
+  time      String
+  type      ConsultationType
+  status    ConsultationStatus @default(Pending)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id])
+
+  @@map("consultations")
+}
+
+model City {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  city        String   @unique
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("cities")
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  userId    String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notifications")
+}
+
+model Calories {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  calories  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("calories")
+}
+
+model AdminPackage {
+  id                    String                  @id @default(auto()) @map("_id") @db.ObjectId
+  packageName           String
+  planName              Plan
+  price                 Int
+  meals                 String[]
+  calories              Int
+  status                Boolean                 @default(true)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  GeneratedPlanWithFood GeneratedPlanWithFood[]
+
+  @@map("admin_packages")
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum MealStatus {
+  Created
+  Added_Cart
+  Payment_Completed
+  Order_Processing
+  Delivered
+}
+
+enum OrderStatus {
+  Created
+  Payment_Completed
+  Order_Processing
+  Delivered
+}
+
+enum UserGoal {
+  lose_weight
+  gain_weight
+  stay_healthy
+  therapeutic_diet
+}
+
+enum PaymentType {
+  NA
+  CASH_ON_DELIVERY
+  BANK_TRANSFER
+}
+
+enum Plan {
+  Daily
+  Weekly
+  Monthly
+}
+
+enum ConsultationType {
+  Online
+  Offline
+}
+
+enum ConsultationStatus {
+  Pending
+  Completed
+}
